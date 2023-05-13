@@ -1,36 +1,69 @@
 <?php
-function updateData($id, $newData) {
-    // Conexión a la base de datos
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "Eval02";
+// Conexión a la base de datos
+$conn = mysqli_connect("localhost", "root", "", "Eval02");
 
-    // Crear conexión
-    $conn = new mysqli($servername, $username, $password, $dbname);
-
-    // Verificar conexión
-    if ($conn->connect_error) {
-        die("Error en la conexión: " . $conn->connect_error);
-    }
-
-    // Consulta para actualizar el registro
-    $sql = "UPDATE Producto SET campo1 = '{$newData['campo1']}', campo2 = '{$newData['campo2']}' WHERE id = $id";
-
-    if ($conn->query($sql) === TRUE) {
-        echo "Registro actualizado correctamente.";
-    } else {
-        echo "Error al actualizar el registro: " . $conn->error;
-    }
-
-    // Cerrar conexión
-    $conn->close();
+// Verificar la conexión
+if (!$conn) {
+    die("Error de conexión: " . mysqli_connect_error());
 }
 
-// Llamada a la función para actualizar un registro específico
-$dataToUpdate = array(
-    'campo1' => 'nuevo_valor1',
-    'campo2' => 'nuevo_valor2'
-);
-updateData(1, $dataToUpdate);
+// Obtener el ID del producto a editar
+$id = $_GET['id'];
+
+// Obtener los datos actuales del producto
+$query = "SELECT * FROM Producto WHERE Producto_id = $id";
+$resultado = mysqli_query($conn, $query);
+$Producto = mysqli_fetch_assoc($resultado);
+
+// Comprobar si se envió el formulario de edición
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Obtener los nuevos datos del formulario
+    $Nombre = $_POST['Nombre'];
+    $Descripcion = $_POST['Descripcion'];
+    $Stock = $_POST['Stock'];
+    $PrecioVenta = $_POST['PrecioVenta'];
+
+    // Actualizar los datos del producto en la base de datos
+    $query = "UPDATE Producto SET Nombre = '$Nombre', Descripcion = '$Descripcion', Stock = $Stock, PrecioVenta = $PrecioVenta WHERE Producto_id = $id";
+    if (mysqli_query($conn, $query)) {
+        echo "Producto actualizado correctamente";
+        // Redireccionar a la página de lista de productos o mostrar un mensaje de éxito
+    } else {
+        echo "Error al actualizar el producto: " . mysqli_error($conn);
+    }
+    if ($query){
+        header("location: index.php");
+    }
+}
+
+// Cerrar la conexión a la base de datos
+mysqli_close($conn);
 ?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Producto</title>
+</head>
+<body>
+    <h1>Editar Producto</h1>
+    <form method="POST">
+        <label for="Nombre">Nombre:</label>
+        <input type="text" name="Nombre" value="<?php echo $Producto['Nombre']; ?>"><br><br>
+        
+        <label for="Descripcion">Descripción:</label>
+        <input type="text" name="Descripcion" value="<?php echo $Producto['Descripcion']; ?>"><br><br>
+        
+        <label for="Stock">Stock:</label>
+        <input type="number" name="Stock" value="<?php echo $Producto['Stock']; ?>"><br><br>
+        
+        <label for="PrecioVenta">Precio de Venta:</label>
+        <input type="number" step="0.01" name="PrecioVenta" value="<?php echo $Producto['PrecioVenta']; ?>"><br><br>
+        
+        <input type="submit" value="Guardar cambios">
+    </form>
+</body>
+</html>
