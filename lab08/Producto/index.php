@@ -17,8 +17,7 @@
         </div>
 
         <form action="Buscador.php" method="get">
-            <input type="text" name="busqueda"><br>
-            <input class="btn btn-primary" name="Agregar" type="submit" value="Agregar">
+            <input class="btn btn-primary" name="Buscar" type="submit" value="Buscar">
         </form>
 
         <div class="card-body">
